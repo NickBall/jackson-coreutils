@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -24,8 +25,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.bundle.PropertiesBundle;
-import com.google.common.base.Supplier;
-import com.google.common.collect.Lists;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -35,8 +34,10 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
@@ -71,7 +72,7 @@ public final class JsonNodeReaderTest
     @DataProvider
     public Iterator<Object[]> getMalformedData()
     {
-        final List<Object[]> list = Lists.newArrayList();
+        final List<Object[]> list = new ArrayList<>();
 
         list.add(new Object[] { "", "read.noContent"});
         list.add(new Object[] { "[]{}", "read.trailingData"});

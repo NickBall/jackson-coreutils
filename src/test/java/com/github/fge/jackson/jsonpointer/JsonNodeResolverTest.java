@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -26,10 +27,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jackson.JacksonUtils;
 import com.github.fge.jackson.NodeType;
 import com.github.fge.jackson.SampleNodeProvider;
-import com.google.common.collect.Lists;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,13 +75,13 @@ public final class JsonNodeResolverTest
         ObjectNode node;
 
         node = FACTORY.objectNode();
-        node.put("a", target);
+        node.set("a", target);
 
         final JsonNode resolved = resolver.get(node);
         assertEquals(resolved, target);
 
         node = FACTORY.objectNode();
-        node.put("b", target);
+        node.set("b", target);
 
         assertNull(resolver.get(node));
     }
@@ -104,7 +105,7 @@ public final class JsonNodeResolverTest
     @DataProvider
     public Iterator<Object[]> invalidIndices()
     {
-        final List<Object[]> list = Lists.newArrayList();
+        final List<Object[]> list = new ArrayList<>();
 
         list.add(new Object[] { "-1" });
         list.add(new Object[] { "232398087298731987987232" });

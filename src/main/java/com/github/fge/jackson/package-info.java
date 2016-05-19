@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -34,8 +35,8 @@
  * com.fasterxml.jackson.databind.DeserializationFeature#USE_BIG_DECIMAL_FOR_FLOATS}.
  * </p>
  *
- * <p>{@link com.github.fge.jackson.JsonNumEquals} is an {@link
- * com.google.common.base.Equivalence} over {@link
+ * <p>{@link com.github.fge.jackson.JsonNumEquals} is an equality strategy  
+ * over {@link
  * com.fasterxml.jackson.databind.JsonNode} for recursive equivalence of JSON
  * number values.</p>
  *

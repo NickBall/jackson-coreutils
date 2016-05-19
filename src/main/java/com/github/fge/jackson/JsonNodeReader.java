@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -19,7 +20,6 @@
 
 package com.github.fge.jackson;
 
-
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -30,7 +30,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.github.fge.Builder;
 import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.bundle.PropertiesBundle;
-import com.google.common.io.Closer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.ThreadSafe;
@@ -39,154 +38,135 @@ import java.io.InputStream;
 import java.io.Reader;
 
 /**
- * Class dedicated to reading JSON values from {@link InputStream}s and {@link
- * Reader}s
+ * Class dedicated to reading JSON values from {@link InputStream}s and
+ * {@link Reader}s
  *
- * <p>This class wraps a Jackson {@link ObjectMapper} so that it read one, and
- * only one, JSON text from a source. By default, when you read and map an
- * input source, Jackson will stop after it has read the first valid JSON text;
- * this means, for instance, that with this as an input:</p>
+ * <p>
+ * This class wraps a Jackson {@link ObjectMapper} so that it read one, and only
+ * one, JSON text from a source. By default, when you read and map an input
+ * source, Jackson will stop after it has read the first valid JSON text; this
+ * means, for instance, that with this as an input:
+ * </p>
  *
  * <pre>
  *     []]]
  * </pre>
  *
- * <p>it will read the initial empty array ({@code []}) and stop there. This
- * class, instead, will peek to see whether anything is after the initial array,
- * and throw an exception if it finds anything.</p>
+ * <p>
+ * it will read the initial empty array ({@code []}) and stop there. This class,
+ * instead, will peek to see whether anything is after the initial array, and
+ * throw an exception if it finds anything.
+ * </p>
  *
- * <p>Note: the input sources are closed by the read methods.</p>
+ * <p>
+ * Note: the input sources are closed by the read methods.
+ * </p>
  *
  * @see ObjectMapper#readValues(JsonParser, Class)
  * @since 1.6
  */
 @ThreadSafe
-public final class JsonNodeReader
-{
-    private static final MessageBundle BUNDLE
-        = PropertiesBundle.forPath("/com/github/fge/jackson/jsonNodeReader");
+public final class JsonNodeReader {
+	private static final MessageBundle BUNDLE = PropertiesBundle.forPath("/com/github/fge/jackson/jsonNodeReader");
 
-    private final ObjectReader reader;
+	private final ObjectReader reader;
 
-    public JsonNodeReader(final ObjectMapper mapper)
-    {
-        reader = mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true)
-            .reader(JsonNode.class);
-    }
+	public JsonNodeReader(final ObjectMapper mapper) {
+		reader = mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true).readerFor(JsonNode.class);
+	}
 
-    /**
-     * No-arg constructor (see description)
-     */
-    public JsonNodeReader()
-    {
-        this(JacksonUtils.newMapper());
-    }
+	/**
+	 * No-arg constructor (see description)
+	 */
+	public JsonNodeReader() {
+		this(JacksonUtils.newMapper());
+	}
 
-    /**
-     * Read a JSON value from an {@link InputStream}
-     *
-     * @param in the input stream
-     * @return the value
-     * @throws IOException malformed input, or problem encountered when reading
-     * from the stream
-     */
-    public JsonNode fromInputStream(final InputStream in)
-        throws IOException
-    {
-        final Closer closer = Closer.create();
-        final JsonParser parser;
-        final MappingIterator<JsonNode> iterator;
+	/**
+	 * Read a JSON value from an {@link InputStream}
+	 *
+	 * @param in
+	 *            the input stream
+	 * @return the value
+	 * @throws IOException
+	 *             malformed input, or problem encountered when reading from the
+	 *             stream
+	 */
+	public JsonNode fromInputStream(final InputStream in) throws IOException {
+		try(final JsonParser parser = reader.getFactory().createParser(in)) {
+			return readNode(parser);
+		}
+	}
 
-        try {
-            parser = closer.register(reader.getFactory().createParser(in));
-            iterator = reader.readValues(parser);
-            return readNode(closer.register(iterator));
-        } finally {
-            closer.close();
-        }
-    }
+	/**
+	 * Read a JSON value from a {@link Reader}
+	 *
+	 * @param r
+	 *            the reader
+	 * @return the value
+	 * @throws IOException
+	 *             malformed input, or problem encountered when reading from the
+	 *             reader
+	 */
+	public JsonNode fromReader(final Reader r) throws IOException {
+		try(final JsonParser parser = reader.getFactory().createParser(r)) {
+			return readNode(parser);
+		}
+	}
 
-    /**
-     * Read a JSON value from a {@link Reader}
-     *
-     * @param r the reader
-     * @return the value
-     * @throws IOException malformed input, or problem encountered when reading
-     * from the reader
-     */
-    public JsonNode fromReader(final Reader r)
-        throws IOException
-    {
-        final Closer closer = Closer.create();
-        final JsonParser parser;
-        final MappingIterator<JsonNode> iterator;
+	private JsonNode readNode(final JsonParser parser) throws IOException {
+		try (final MappingIterator<JsonNode> iterator = reader.readValues(parser)) {
+			return readNode(iterator);
+		}
+	}
 
-        try {
-            parser = closer.register(reader.getFactory().createParser(r));
-            iterator = reader.readValues(parser);
-            return readNode(closer.register(iterator));
-        } finally {
-            closer.close();
-        }
-    }
+	private static JsonNode readNode(final MappingIterator<JsonNode> iterator) throws IOException {
+		final Object source = iterator.getParser().getInputSource();
+		final JsonParseExceptionBuilder builder = new JsonParseExceptionBuilder(source, iterator.getParser());
 
-    private static JsonNode readNode(final MappingIterator<JsonNode> iterator)
-        throws IOException
-    {
-        final Object source = iterator.getParser().getInputSource();
-        final JsonParseExceptionBuilder builder
-            = new JsonParseExceptionBuilder(source);
+		builder.setMessage(BUNDLE.getMessage("read.noContent"));
 
-       builder.setMessage(BUNDLE.getMessage("read.noContent"));
+		if (!iterator.hasNextValue())
+			throw builder.build();
 
-        if (!iterator.hasNextValue())
-            throw builder.build();
+		final JsonNode ret = iterator.nextValue();
 
-        final JsonNode ret = iterator.nextValue();
+		builder.setMessage(BUNDLE.getMessage("read.trailingData")).setLocation(iterator.getCurrentLocation());
 
-        builder.setMessage(BUNDLE.getMessage("read.trailingData"))
-            .setLocation(iterator.getCurrentLocation());
+		try {
+			if (iterator.hasNextValue())
+				throw builder.build();
+		} catch (JsonParseException e) {
+			throw builder.setLocation(e.getLocation()).build();
+		}
 
-        try {
-            if (iterator.hasNextValue())
-                throw builder.build();
-        } catch (JsonParseException e) {
-            throw builder.setLocation(e.getLocation()).build();
-        }
+		return ret;
+	}
 
-        return ret;
-    }
+	private static final class JsonParseExceptionBuilder implements Builder<JsonParseException> {
+		private String message = "";
+		private JsonLocation location;
+		private JsonParser parser;
 
-    private static final class JsonParseExceptionBuilder
-        implements Builder<JsonParseException>
-    {
-        private String message = "";
-        private JsonLocation location;
+		private JsonParseExceptionBuilder(@Nonnull final Object source, @Nonnull final JsonParser parser) {
+			BUNDLE.checkNotNull(source, "read.nullArgument");
+			location = new JsonLocation(source, 0L, 1, 1);
+			this.parser = parser;
+		}
 
-        private JsonParseExceptionBuilder(@Nonnull final Object source)
-        {
-            BUNDLE.checkNotNull(source, "read.nullArgument");
-            location = new JsonLocation(source, 0L, 1, 1);
-        }
+		private JsonParseExceptionBuilder setMessage(@Nonnull final String message) {
+			this.message = BUNDLE.checkNotNull(message, "read.nullArgument");
+			return this;
+		}
 
-        private JsonParseExceptionBuilder setMessage(
-            @Nonnull final String message)
-        {
-            this.message = BUNDLE.checkNotNull(message, "read.nullArgument");
-            return this;
-        }
+		private JsonParseExceptionBuilder setLocation(@Nonnull final JsonLocation location) {
+			this.location = BUNDLE.checkNotNull(location, "read.nullArgument");
+			return this;
+		}
 
-        private JsonParseExceptionBuilder setLocation(
-            @Nonnull final JsonLocation location)
-        {
-            this.location = BUNDLE.checkNotNull(location, "read.nullArgument");
-            return this;
-        }
-
-        @Override
-        public JsonParseException build()
-        {
-            return new JsonParseException(message, location);
-        }
-    }
+		@Override
+		public JsonParseException build() {
+			return new JsonParseException(parser, message, location);
+		}
+	}
 }

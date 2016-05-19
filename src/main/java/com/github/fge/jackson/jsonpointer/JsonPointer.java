@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -22,10 +23,11 @@ package com.github.fge.jackson.jsonpointer;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 
 import javax.annotation.concurrent.Immutable;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -43,9 +45,8 @@ public final class JsonPointer
     /**
      * The empty JSON Pointer
      */
-    private static final JsonPointer EMPTY
-        = new JsonPointer(ImmutableList.<TokenResolver<JsonNode>>of());
-
+    private static final JsonPointer EMPTY = new JsonPointer(Collections.emptyList());
+    
     /**
      * Return an empty JSON Pointer
      *
@@ -72,7 +73,7 @@ public final class JsonPointer
      */
     public static JsonPointer of(final Object first, final Object... other)
     {
-        final List<ReferenceToken> tokens = Lists.newArrayList();
+        final List<ReferenceToken> tokens = new ArrayList<>();
 
         tokens.add(ReferenceToken.fromRaw(first.toString()));
 
@@ -120,7 +121,7 @@ public final class JsonPointer
         final ReferenceToken refToken = ReferenceToken.fromRaw(raw);
         final JsonNodeResolver resolver = new JsonNodeResolver(refToken);
         final List<TokenResolver<JsonNode>> list
-            = Lists.newArrayList(tokenResolvers);
+            = new ArrayList<>(tokenResolvers);
         list.add(resolver);
         return new JsonPointer(list);
     }
@@ -147,7 +148,7 @@ public final class JsonPointer
     {
         BUNDLE.checkNotNull(other, "nullInput");
         final List<TokenResolver<JsonNode>> list
-            = Lists.newArrayList(tokenResolvers);
+            = new ArrayList<>(tokenResolvers);
         list.addAll(other.tokenResolvers);
         return new JsonPointer(list);
     }
@@ -177,7 +178,7 @@ public final class JsonPointer
     private static List<TokenResolver<JsonNode>> fromTokens(
         final List<ReferenceToken> tokens)
     {
-        final List<TokenResolver<JsonNode>> list = Lists.newArrayList();
+        final List<TokenResolver<JsonNode>> list = new ArrayList<>();
         for (final ReferenceToken token: tokens)
             list.add(new JsonNodeResolver(token));
         return list;

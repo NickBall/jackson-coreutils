@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -26,13 +27,13 @@ import com.github.fge.jackson.NodeType;
 import com.github.fge.jackson.SampleNodeProvider;
 import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.load.MessageBundles;
-import com.google.common.collect.Lists;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,7 +71,7 @@ public final class JsonPointerTest
     @DataProvider
     public Iterator<Object[]> rawPointers()
     {
-        final List<Object[]> list = Lists.newArrayList();
+        final List<Object[]> list = new ArrayList<>();
         final JsonNode testNode = testData.get("pointers");
         final Map<String, JsonNode> map = JacksonUtils.asMap(testNode);
 
@@ -93,7 +94,7 @@ public final class JsonPointerTest
     @DataProvider
     public Iterator<Object[]> uriPointers()
     {
-        final List<Object[]> list = Lists.newArrayList();
+        final List<Object[]> list = new ArrayList<>();
         final JsonNode testNode = testData.get("uris");
         final Map<String, JsonNode> map = JacksonUtils.asMap(testNode);
 
@@ -185,7 +186,7 @@ public final class JsonPointerTest
     @DataProvider
     public Iterator<Object[]> parentTestData()
     {
-        final List<Object[]> list = Lists.newArrayList();
+        final List<Object[]> list = new ArrayList<>();
 
         // Empty
         list.add(new Object[] { JsonPointer.empty(), JsonPointer.empty() });

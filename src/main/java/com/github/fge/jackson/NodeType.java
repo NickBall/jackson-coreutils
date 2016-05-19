@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -22,11 +23,15 @@ package com.github.fge.jackson;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nonnull;
 
 /**
  * Enumeration for the different types of JSON instances which can be
@@ -98,13 +103,9 @@ public enum NodeType
         TOKEN_MAP.put(JsonToken.START_OBJECT, OBJECT);
         TOKEN_MAP.put(JsonToken.VALUE_STRING, STRING);
 
-        final ImmutableMap.Builder<String, NodeType> builder
-            = ImmutableMap.builder();
-
-        for (final NodeType type: NodeType.values())
-            builder.put(type.name, type);
-
-        NAME_MAP = builder.build();
+        final Map<String,NodeType> nameMap = Arrays.stream(NodeType.values()) //
+        		.collect(Collectors.toMap(NodeType::name, n -> n));
+        NAME_MAP = Collections.unmodifiableMap(nameMap);
     }
 
     NodeType(final String name)
@@ -136,12 +137,12 @@ public enum NodeType
      * @param node the node to determine the type of
      * @return the type for this node
      */
-    public static NodeType getNodeType(final JsonNode node)
+    public static NodeType getNodeType(@Nonnull final JsonNode node)
     {
         final JsonToken token = node.asToken();
         final NodeType ret = TOKEN_MAP.get(token);
 
-        Preconditions.checkNotNull(ret, "unhandled token type " + token);
+        Objects.requireNonNull(ret, "unhandled token type " + token);
 
         return ret;
     }

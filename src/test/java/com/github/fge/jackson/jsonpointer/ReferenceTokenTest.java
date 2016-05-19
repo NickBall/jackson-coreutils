@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -21,10 +22,10 @@ package com.github.fge.jackson.jsonpointer;
 
 import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.load.MessageBundles;
-import com.google.common.collect.ImmutableList;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static org.testng.Assert.*;
@@ -81,7 +82,7 @@ public final class ReferenceTokenTest
     @DataProvider
     public Iterator<Object[]> cookedRaw()
     {
-        return ImmutableList.of(
+        return Arrays.asList(
             new Object[] { "~0", "~" },
             new Object[] { "~1", "/" },
             new Object[] { "", "" },
@@ -106,7 +107,7 @@ public final class ReferenceTokenTest
     @DataProvider
     public Iterator<Object[]> indices()
     {
-        return ImmutableList.of(
+        return Arrays.asList(
             new Object[] { 0, "0" },
             new Object[] { -1, "-1" },
             new Object[]{ 13, "13" }

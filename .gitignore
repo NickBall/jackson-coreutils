@@ -1,6 +1,11 @@
-*.iml
-target
-.idea
+/bin/
 build
+.classpath
 .gradle
+.idea
+*.iml
 out
+.project
+.settings/
+target
+test-output/

@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -20,6 +21,7 @@
 package com.github.fge.jackson;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator.Feature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,11 +30,11 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.google.common.collect.Maps;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -98,7 +100,7 @@ public final class JacksonUtils
             return Collections.emptyMap();
 
         final Iterator<Map.Entry<String, JsonNode>> iterator = node.fields();
-        final Map<String, JsonNode> ret = Maps.newHashMap();
+        final Map<String, JsonNode> ret = new HashMap<>();
 
         Map.Entry<String, JsonNode> entry;
 
@@ -141,8 +143,8 @@ public final class JacksonUtils
      * <p>The returned mapper will have the following features enabled:</p>
      *
      * <ul>
+     *     <li>{@link Feature.WRITE_BIGDECIMAL_AS_PLAIN};</li>
      *     <li>{@link DeserializationFeature#USE_BIG_DECIMAL_FOR_FLOATS};</li>
-     *     <li>{@link SerializationFeature#WRITE_BIGDECIMAL_AS_PLAIN};</li>
      *     <li>{@link SerializationFeature#INDENT_OUTPUT}.</li>
      * </ul>
      *
@@ -153,8 +155,8 @@ public final class JacksonUtils
     public static ObjectMapper newMapper()
     {
         return new ObjectMapper().setNodeFactory(FACTORY)
+        	.enable(Feature.WRITE_BIGDECIMAL_AS_PLAIN)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-            .enable(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN)
             .enable(SerializationFeature.INDENT_OUTPUT);
     }
 }

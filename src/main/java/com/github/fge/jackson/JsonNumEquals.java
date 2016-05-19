@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -20,15 +21,15 @@
 package com.github.fge.jackson;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.base.Equivalence;
-import com.google.common.collect.Sets;
+import com.github.fge.jackson.EqualityStrategy;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 /**
- * An {@link Equivalence} strategy for JSON Schema equality
+ * An {@link EqualityStrategy} strategy for JSON Schema equality
  *
  * <p>{@link JsonNode} does a pretty good job of obeying the  {@link
  * Object#equals(Object) equals()}/{@link Object#hashCode() hashCode()}
@@ -41,22 +42,22 @@ import java.util.Set;
  * kind of equality.</p>
  */
 public final class JsonNumEquals
-    extends Equivalence<JsonNode>
+    extends EqualityStrategy<JsonNode>
 {
-    private static final Equivalence<JsonNode> INSTANCE
+    private static final EqualityStrategy<JsonNode> INSTANCE
         = new JsonNumEquals();
 
     private JsonNumEquals()
     {
     }
 
-    public static Equivalence<JsonNode> getInstance()
+    public static EqualityStrategy<JsonNode> getInstance()
     {
         return INSTANCE;
     }
 
     @Override
-    protected boolean doEquivalent(final JsonNode a, final JsonNode b)
+    protected boolean doEquals(final JsonNode a, final JsonNode b)
     {
         /*
          * If both are numbers, delegate to the helper method
@@ -172,7 +173,7 @@ public final class JsonNumEquals
         final int size = a.size();
 
         for (int i = 0; i < size; i++)
-            if (!doEquivalent(a.get(i), b.get(i)))
+            if (!doEquals(a.get(i), b.get(i)))
                 return false;
 
         return true;
@@ -183,13 +184,17 @@ public final class JsonNumEquals
         /*
          * Grab the key set from the first node
          */
-        final Set<String> keys = Sets.newHashSet(a.fieldNames());
+    	final Set<String> keys = new HashSet<>();
+    	a.fieldNames().forEachRemaining(keys::add);
 
         /*
          * Grab the key set from the second node, and see if both sets are the
          * same. If not, objects are not equal, no need to check for children.
          */
-        final Set<String> set = Sets.newHashSet(b.fieldNames());
+        //final Set<String> set = Sets.newHashSet(b.fieldNames());
+    	final Set<String> set = new HashSet<>();
+    	b.fieldNames().forEachRemaining(set::add);
+    	
         if (!set.equals(keys))
             return false;
 
@@ -197,7 +202,7 @@ public final class JsonNumEquals
          * Test each member individually.
          */
         for (final String key: keys)
-            if (!doEquivalent(a.get(key), b.get(key)))
+            if (!doEquals(a.get(key), b.get(key)))
                 return false;
 
         return true;

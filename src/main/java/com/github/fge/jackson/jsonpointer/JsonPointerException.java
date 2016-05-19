@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -22,7 +23,9 @@ package com.github.fge.jackson.jsonpointer;
 public final class JsonPointerException
     extends Exception
 {
-    public JsonPointerException(final String message)
+	private static final long serialVersionUID = 1L;
+
+	public JsonPointerException(final String message)
     {
         super(message);
     }

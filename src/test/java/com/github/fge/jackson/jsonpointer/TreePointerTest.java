@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2016 Nick Ball (nick@wolfninja.com)
  * Copyright (c) 2014, Francis Galiegue (fgaliegue@gmail.com)
  *
  * This software is dual-licensed under:
@@ -22,10 +23,11 @@ package com.github.fge.jackson.jsonpointer;
 import com.fasterxml.jackson.core.TreeNode;
 import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.load.MessageBundles;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
@@ -65,7 +67,7 @@ public final class TreePointerTest
         throws JsonPointerException
     {
         assertEquals(TreePointer.tokensFromInput(""),
-            ImmutableList.<ReferenceToken>of());
+            Collections.emptyList());
     }
 
     @Test
@@ -73,7 +75,7 @@ public final class TreePointerTest
         throws JsonPointerException
     {
         final List<ReferenceToken> expected
-            = ImmutableList.of(ReferenceToken.fromCooked(""));
+            = Collections.singletonList(ReferenceToken.fromCooked(""));
         final List<ReferenceToken> actual = TreePointer.tokensFromInput("/");
 
         assertEquals(actual, expected);
@@ -83,7 +85,7 @@ public final class TreePointerTest
     public void tokenListRespectsOrder()
         throws JsonPointerException
     {
-        final List<ReferenceToken> expected = ImmutableList.of(
+        final List<ReferenceToken> expected = Arrays.asList(
             ReferenceToken.fromRaw("/"),
             ReferenceToken.fromRaw("~"),
             ReferenceToken.fromRaw("x")
@@ -98,7 +100,7 @@ public final class TreePointerTest
     public void tokenListAccountsForEmptyTokens()
         throws JsonPointerException
     {
-        final List<ReferenceToken> expected = ImmutableList.of(
+        final List<ReferenceToken> expected = Arrays.asList(
             ReferenceToken.fromRaw("a"),
             ReferenceToken.fromRaw(""),
             ReferenceToken.fromRaw("b")
@@ -121,7 +123,7 @@ public final class TreePointerTest
         when(token1.get(any(TreeNode.class))).thenReturn(null);
 
         final DummyPointer ptr = new DummyPointer(missing,
-            ImmutableList.of(token1, token2));
+            Arrays.asList(token1, token2));
 
         final TreeNode node = mock(TreeNode.class);
         final TreeNode ret = ptr.get(node);
@@ -143,7 +145,7 @@ public final class TreePointerTest
         when(token1.get(any(TreeNode.class))).thenReturn(null);
 
         final DummyPointer ptr = new DummyPointer(missing,
-            ImmutableList.of(token1, token2));
+            Arrays.asList(token1, token2));
 
         final TreeNode node = mock(TreeNode.class);
         final TreeNode ret = ptr.path(node);
@@ -156,7 +158,7 @@ public final class TreePointerTest
     @Test
     public void treePointerCanTellWhetherItIsEmpty()
     {
-        final List<TokenResolver<TreeNode>> list = Lists.newArrayList();
+        final List<TokenResolver<TreeNode>> list = new ArrayList<>();
 
         assertTrue(new DummyPointer(null, list).isEmpty());
 
@@ -170,7 +172,7 @@ public final class TreePointerTest
     @Test
     public void treeIsUnalteredWhenOriginalListIsAltered()
     {
-        final List<TokenResolver<TreeNode>> list = Lists.newArrayList();
+        final List<TokenResolver<TreeNode>> list = new ArrayList<>();
         final DummyPointer dummy = new DummyPointer(null, list);
 
         @SuppressWarnings("unchecked")
