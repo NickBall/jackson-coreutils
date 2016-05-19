@@ -143,7 +143,7 @@ public final class JacksonUtils
      * <p>The returned mapper will have the following features enabled:</p>
      *
      * <ul>
-     *     <li>{@link Feature.WRITE_BIGDECIMAL_AS_PLAIN};</li>
+     *     <li>{@link Feature#WRITE_BIGDECIMAL_AS_PLAIN};</li>
      *     <li>{@link DeserializationFeature#USE_BIG_DECIMAL_FOR_FLOATS};</li>
      *     <li>{@link SerializationFeature#INDENT_OUTPUT}.</li>
      * </ul>
